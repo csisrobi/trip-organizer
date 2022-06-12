@@ -18,10 +18,12 @@
     "cookie": "^0.5.0",
     "jsonwebtoken": "^8.5.1",
     "next": "12.1.6",
+    "next-auth": "^4.4.0",
     "notistack": "^2.0.5",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-hook-form": "^7.32.0",
+    "react-icons": "^4.4.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {

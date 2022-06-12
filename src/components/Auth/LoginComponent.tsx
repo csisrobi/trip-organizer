@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
-import { authLogin } from '../../../lib/mutations';
+import { signIn } from 'next-auth/react';
 
 export const LoginComponent = () => {
   const router = useRouter();
@@ -26,14 +26,15 @@ export const LoginComponent = () => {
   const handleFormSubmit = useMemo(() => {
     return handleSubmit(({ password, email }) => {
       (async () => {
-        const user = await authLogin({
-          password,
+        const auth = await signIn('credentials', {
+          redirect: false,
           email,
+          password,
         });
-        if (!user.error) {
+        if (!auth.error) {
           router.replace('/');
         } else {
-          enqueueSnackbar(user.error, {
+          enqueueSnackbar(auth.error, {
             variant: 'error',
           });
         }

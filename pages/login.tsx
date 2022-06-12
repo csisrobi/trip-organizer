@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Paper, Box } from '@mui/material';
 import { AuthComponent } from '../src/components/Auth';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 const Login = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      router.push('/');
+    }
+  }, [router, session]);
+
   return (
     <Box
       sx={{

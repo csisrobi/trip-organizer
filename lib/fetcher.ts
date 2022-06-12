@@ -1,5 +1,5 @@
 export default function fetcher(url: string, data?: Object) {
-  return fetch(`${window.location.origin}/api${url}`, {
+  return fetch(`http://localhost:3000/api${url}`, {
     method: data ? 'POST' : 'GET',
     credentials: 'include',
     headers: {
