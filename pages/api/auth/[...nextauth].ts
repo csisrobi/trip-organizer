@@ -4,7 +4,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authLogin } from '../../../lib/mutations';
 import { SessionStrategy } from 'next-auth';
-import cookie from 'cookie';
 
 const nextAuthOptions = (req: NextApiRequest, res: NextApiResponse) => {
   return {
@@ -48,7 +47,7 @@ const nextAuthOptions = (req: NextApiRequest, res: NextApiResponse) => {
       },
       session: ({ session, token }) => {
         if (token) {
-          session.id = token.id;
+          session.user.id = token.id;
         }
         return session;
       },

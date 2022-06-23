@@ -20,7 +20,6 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundImage: `url(${'./tripBG.jpg'})`,
         height: '100vh',
         width: '100vw',
         backgroundSize: 'cover',
@@ -31,7 +30,7 @@ const Login = () => {
         sx={{
           width: '400px',
           height: '50%',
-          backgroundImage: 'linear-gradient(to bottom right, #cf8aa9, #fdefca)',
+          backgroundImage: 'linear-gradient(to bottom left, #ad78a4, #fcf0ca)',
         }}
       >
         <AuthComponent mode={'login'} />
@@ -39,5 +38,7 @@ const Login = () => {
     </Box>
   );
 };
+
+Login.authPage = true;
 
 export default Login;

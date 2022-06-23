@@ -20,7 +20,7 @@ const Register = () => {
         sx={{
           width: '400px',
           height: '60%',
-          backgroundImage: 'linear-gradient(to bottom right, #cf8aa9, #fdefca)',
+          backgroundImage: 'linear-gradient(to bottom left, #ad78a4, #fcf0ca)',
         }}
       >
         <AuthComponent mode={'register'} />
@@ -28,5 +28,7 @@ const Register = () => {
     </Box>
   );
 };
+
+Register.authPage = true;
 
 export default Register;
