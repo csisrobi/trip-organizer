@@ -22,4 +22,22 @@ model User {
   description    String?
   profilePicture String?
   password       String
+  routes         Route[]
+}
+
+model Route {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  name         String   @unique
+  description  String
+  coverPhoto   String
+  difficulty   String
+  type         String
+  distance     String
+  length       String
+  location     String?
+  participants Int?
+  User         User?    @relation(fields: [userId], references: [id])
+  userId       Int?
 }
