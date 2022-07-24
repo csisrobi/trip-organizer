@@ -1,4 +1,4 @@
-export default function formDataFetcher(url: string, data: any) {
+export default function formDataFetcher(url: string, data: FormData) {
   return fetch(`http://localhost:3000/api${url}`, {
     method: 'POST',
     credentials: 'include',

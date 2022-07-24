@@ -3,6 +3,7 @@ import { SnackbarProvider } from 'notistack';
 import { SessionProvider } from 'next-auth/react';
 import { Box, CssBaseline, StyledEngineProvider } from '@mui/material';
 import { Layout } from '../src/components/Layout';
+import { appWithTranslation } from 'next-i18next';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
@@ -10,7 +11,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
       <StyledEngineProvider injectFirst>
         <CssBaseline>
           <SnackbarProvider maxSnack={3}>
-            <Box sx={{ backgroundImage: `url(${'./tripBG.jpg'})` }}>
+            <Box sx={{}}>
               {(Component as any).authPage ? (
                 <Component {...pageProps} />
               ) : (
@@ -26,4 +27,4 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   );
 }
 
-export default MyApp;
+export default appWithTranslation(MyApp);

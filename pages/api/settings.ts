@@ -12,7 +12,7 @@ export const config = {
 
 const saveFile = async (filename, filepath) => {
   const data = fs.readFileSync(filepath);
-  fs.writeFileSync(`./public/uploads/${filename}`, data);
+  fs.writeFileSync(`./public/profilePictures/${filename}`, data);
   await fs.unlinkSync(filepath);
   return;
 };
@@ -64,7 +64,6 @@ const settings = async (req: NextApiRequest, res: NextApiResponse) => {
           await saveFile(newFileName, files.file.filepath);
         }
       } catch (e) {
-        console.log(e);
         res.status(404);
         res.json({ error: 'User not existing' });
       }

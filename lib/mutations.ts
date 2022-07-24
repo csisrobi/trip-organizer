@@ -1,19 +1,26 @@
 import fetcher from './fetcher';
 import formDataFetcher from './formDataFetcher';
 
-export const authLogin = (body: { email: string; password: string }) => {
-  return fetcher('/login', body);
-};
+export const authLogin = (body: { email: string; password: string }) =>
+  fetcher('/login', body);
 
 export const authRegister = (body: {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-}) => {
-  return fetcher('/register', body);
-};
+}) => fetcher('/register', body);
 
-export const changeSettings = (body: any) => {
-  return formDataFetcher('/settings', body);
-};
+export const getFile = (filename: string) =>
+  fetcher(`/file?filename=${filename}`);
+
+export const changeSettings = (body: FormData) =>
+  formDataFetcher('/settings', body);
+
+export const createRoute = (body: FormData) => formDataFetcher('/route', body);
+
+export const joinRoute = (body: { userId: number; routeId: number }) =>
+  fetcher('/route/join', body);
+
+export const payRoute = (body: { stripePrice: string; routeId: number }) =>
+  fetcher('/payment', body);

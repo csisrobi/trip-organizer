@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { getSession } from 'next-auth/react';
 import { User } from '@prisma/client';
 import prisma from '../../lib/prisma';
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import { Avatar, Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { MdEmail, MdPerson, MdPhone } from 'react-icons/md';
 
 type Props = {
   user: User;
@@ -27,80 +27,79 @@ const Profile = ({ user }: Props) => {
           direction="column"
           sx={{ height: '100%', width: '100%' }}
         >
-          <Grid container item xs={5}>
+          <Grid
+            container
+            item
+            xs={4}
+            sx={{
+              pt: '1%',
+            }}
+          >
             <Grid
               container
               item
               xs={4}
-              sx={{ backgroundColor: 'teal' }}
-              alignItems="center"
-              justifyContent="center"
+              direction="column"
+              alignContent="center"
+              justifyContent="flex-start"
             >
-              <Avatar sx={{ width: 270, height: 270 }}>R</Avatar>
+              <Stack spacing={2}>
+                <Avatar
+                  src={`/profilePictures/${user.profilePicture}`}
+                  sx={{ width: 150, height: 150 }}
+                >
+                  R
+                </Avatar>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <MdPerson />
+                  <Typography>
+                    : {user.firstName} {user.lastName}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <MdEmail />
+                  <Typography>: {user.email}</Typography>
+                </Box>
+                {user.phoneNumber && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <MdPhone />
+                    <Typography>: {user.phoneNumber}</Typography>
+                  </Box>
+                )}
+              </Stack>
             </Grid>
             {/* TODO: style + put icons for email and phone number */}
             <Grid container item xs={8} direction="column">
-              <Grid container item xs={6}>
-                <Grid container item xs={6} direction="column">
-                  <Grid
-                    container
-                    item
-                    xs={6}
-                    alignContent="center"
-                    justifyContent="center"
-                  >
-                    <Typography variant="h5">
-                      First name: {user.firstName}
-                    </Typography>
-                  </Grid>
-                  <Grid
-                    container
-                    item
-                    xs={6}
-                    alignContent="center"
-                    justifyContent="center"
-                  >
-                    <Typography variant="h5">Email: {user.email}</Typography>
-                  </Grid>
-                </Grid>
-                <Grid container item xs={6} direction="column">
-                  <Grid
-                    container
-                    item
-                    xs={6}
-                    alignContent="center"
-                    justifyContent="center"
-                  >
-                    <Typography variant="h5">
-                      Last name: {user.lastName}
-                    </Typography>
-                  </Grid>
-                  <Grid
-                    container
-                    item
-                    xs={6}
-                    alignContent="center"
-                    justifyContent="center"
-                  >
-                    <Typography variant="h5">
-                      Phone number: 0742547186
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid container item xs={6}>
-                <Typography>
-                  Description: We all know photos and videos are important for
-                  winning over potential clients, but don’t forget about another
-                  essential piece of the puzzle: your profile description. Your
-                  profile description tells potential clients what you do, who
-                  you are, and what makes you special! Keep the 6 tips below in
-                  mind as you're writing it.
-                </Typography>
+              <Grid container item>
+                <Box>
+                  <Typography>Description</Typography>
+                  <Typography
+                    variant="body1"
+                    dangerouslySetInnerHTML={{ __html: user.description }}
+                  />
+                </Box>
               </Grid>
             </Grid>
           </Grid>
-          <Grid container item xs={7} sx={{ backgroundColor: 'red' }}>
+          <Grid container item xs={8} sx={{ backgroundColor: 'red' }}>
             STATISZTIKA
           </Grid>
         </Grid>
@@ -121,6 +120,9 @@ export async function getServerSideProps(context) {
         lastName: true,
         id: true,
         email: true,
+        phoneNumber: true,
+        description: true,
+        profilePicture: true,
       },
     });
     return {

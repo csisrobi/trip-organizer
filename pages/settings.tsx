@@ -100,7 +100,7 @@ const Settings = ({ user }: Props) => {
             profilePicture && profilePicture[0]
               ? URL.createObjectURL(profilePicture[0])
               : user.profilePicture
-              ? `./uploads/${user.profilePicture}`
+              ? `./profilePictures/${user.profilePicture}`
               : ''
           }
           imgProps={{
@@ -334,7 +334,6 @@ export async function getServerSideProps(context) {
       props: { user },
     };
   } catch (e) {
-    console.log(e);
     return {
       redirect: {
         destination: '/error',

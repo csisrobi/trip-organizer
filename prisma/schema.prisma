@@ -12,32 +12,53 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  email          String   @unique
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  email          String    @unique
   firstName      String
   lastName       String
   phoneNumber    String?
   description    String?
   profilePicture String?
   password       String
-  routes         Route[]
+  CreatedRoutes  Route[]   @relation("Created")
+  JoinedRoutes   Route[]
+  Comment        Comment[]
 }
 
 model Route {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  name         String   @unique
-  description  String
-  coverPhoto   String
-  difficulty   String
-  type         String
-  distance     String
-  length       String
-  location     String?
-  participants Int?
-  User         User?    @relation(fields: [userId], references: [id])
-  userId       Int?
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  name             String    @unique
+  description      String
+  coverPhoto       String
+  difficulty       String
+  type             String
+  distance         String
+  length           String
+  groupTour        Boolean
+  track            String?
+  meetingLocation  String?
+  meetingTime      String?
+  price            String?
+  stripePrice      String?
+  startDate        String?
+  endDate          String?
+  maxParticipants  Int?
+  CreatorUser      User      @relation("Created", fields: [userId], references: [id])
+  userId           Int
+  ParticipantUsers User[]
+  Comments         Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  Route     Route    @relation(fields: [routeId], references: [id])
+  routeId   Int
 }
