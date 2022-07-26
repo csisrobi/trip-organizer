@@ -44,6 +44,14 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
               id: true,
             },
           },
+          Comments: {
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              user: true,
+            },
+          },
         },
       });
     } catch (e) {

@@ -24,3 +24,9 @@ export const joinRoute = (body: { userId: number; routeId: number }) =>
 
 export const payRoute = (body: { stripePrice: string; routeId: number }) =>
   fetcher('/payment', body);
+
+export const createComment = (body: {
+  userId: number;
+  routeId: number;
+  content: string;
+}) => fetcher('/route/comment', body);

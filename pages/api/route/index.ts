@@ -18,8 +18,11 @@ const saveFile = async (filename, filepath, publicFolder) => {
 
 const route = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const form = new formidable.IncomingForm();
+    const form = new formidable.IncomingForm({ multiples: true });
     form.parse(req, async function (err, fields, files) {
+      const meetingLocation = fields.meetingLocation.map((num) =>
+        parseFloat(num),
+      );
       const coverPhoto = files.coverPhoto
         ? `${files.coverPhoto.newFilename}${files.coverPhoto.originalFilename}`
         : undefined;
@@ -37,7 +40,6 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
         groupTour,
         maxParticipants,
         price,
-        location,
         meetingTime,
         startDate,
         endDate,
@@ -65,7 +67,7 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           groupTour: groupTour === 'true',
           maxParticipants: parseInt(maxParticipants) || -1,
           price,
-          meetingLocation: location,
+          meetingLocation,
           meetingTime,
           startDate,
           endDate,

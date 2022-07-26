@@ -23,6 +23,15 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { createRoute } from '../../lib/mutations';
 import { xml2json } from 'xml-js';
 import { LatLngExpression } from 'leaflet';
+import {
+  DatePicker,
+  TimePicker,
+  LocalizationProvider,
+} from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import moment from 'moment';
+import { DevTool } from '@hookform/devtools';
+import { useRouter } from 'next/router';
 
 const CreateRoute = ({ user }: { user: User }) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -32,8 +41,14 @@ const CreateRoute = ({ user }: { user: User }) => {
     control,
     formState: { errors },
   } = useForm();
+  const router = useRouter();
 
-  const Map = dynamic(() => import('../../src/components/MapTest'), {
+  const Map = dynamic(() => import('../../src/components/MapDisplay'), {
+    loading: () => <p>A map is loading</p>,
+    ssr: false,
+  });
+
+  const MapLocation = dynamic(() => import('../../src/components/MapMarker'), {
     loading: () => <p>A map is loading</p>,
     ssr: false,
   });
@@ -68,10 +83,19 @@ const CreateRoute = ({ user }: { user: User }) => {
       formData.append('length', data.length);
       formData.append('groupTour', data.public);
       formData.append('routeFile', data.routeFile);
-      formData.append('maxParticipants', data.maxNumParticipants);
       formData.append('coverPhoto', data.coverPhoto);
-      console.log(data.price);
-      formData.append('price', data.price);
+      if (data.public === true) {
+        formData.append('maxParticipants', data.maxNumParticipants);
+        formData.append('price', data.price);
+        formData.append('meetingLocation[]', data.meetingLocation[0]);
+        formData.append('meetingLocation[]', data.meetingLocation[1]);
+        formData.append(
+          'meetingTime',
+          moment(data.meetingTime).format('hh:mm a'),
+        );
+        formData.append('startDate', data.startDate);
+        formData.append('endDate', data.endDate);
+      }
 
       (async () => {
         const settings = await createRoute(formData);
@@ -79,6 +103,7 @@ const CreateRoute = ({ user }: { user: User }) => {
           enqueueSnackbar('Route created successfully', {
             variant: 'success',
           });
+          router.replace('/');
         } else {
           enqueueSnackbar(settings.error, {
             variant: 'error',
@@ -86,7 +111,7 @@ const CreateRoute = ({ user }: { user: User }) => {
         }
       })();
     });
-  }, [enqueueSnackbar, handleSubmit, user.id]);
+  }, [enqueueSnackbar, handleSubmit, router, user.id]);
 
   const UploadKml = () => {
     const routeFile = useWatch({
@@ -109,7 +134,6 @@ const CreateRoute = ({ user }: { user: User }) => {
             render={({ field: { onChange } }) => (
               <>
                 <input
-                  {...register('routeFile')}
                   hidden
                   id="routefile"
                   type="file"
@@ -174,23 +198,106 @@ const CreateRoute = ({ user }: { user: User }) => {
     });
     if (groupTour) {
       return (
-        <Box>
-          <TextField
-            size="small"
-            {...register('maxNumParticipants')}
-            type="number"
-            label="Max number of participants"
-          />
-          <TextField
-            {...register('price')}
-            size="small"
-            type="number"
-            label="Price"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">RON</InputAdornment>,
-            }}
-          />
-        </Box>
+        <>
+          <Grid container item xs={6}>
+            <Stack
+              spacing={2}
+              direction="column"
+              sx={{ width: '100%', height: '100%', mr: '2%' }}
+            >
+              <TextField
+                size="small"
+                {...register('maxNumParticipants')}
+                type="number"
+                label="Max number of participants"
+              />
+              <TextField
+                {...register('price')}
+                size="small"
+                type="number"
+                label="Price"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">RON</InputAdornment>
+                  ),
+                }}
+              />
+              <LocalizationProvider dateAdapter={AdapterMoment}>
+                <Controller
+                  control={control}
+                  name="startDate"
+                  render={({ field: { onChange, value } }) => (
+                    <DatePicker
+                      value={value}
+                      onChange={(e) => {
+                        onChange(moment(e).format('YYYY.MM.DD'));
+                      }}
+                      mask="____.__.__"
+                      inputFormat="YYYY.MM.DD"
+                      label="Start date"
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+              <LocalizationProvider dateAdapter={AdapterMoment}>
+                <Controller
+                  control={control}
+                  name="endDate"
+                  render={({ field: { onChange, value } }) => (
+                    <DatePicker
+                      value={value}
+                      onChange={(e) => {
+                        onChange(moment(e).format('YYYY.MM.DD'));
+                      }}
+                      mask="____.__.__"
+                      inputFormat="YYYY.MM.DD"
+                      label="End date"
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+              <LocalizationProvider dateAdapter={AdapterMoment}>
+                <Controller
+                  control={control}
+                  name="meetingTime"
+                  render={({ field: { onChange, value } }) => (
+                    <TimePicker
+                      ampm
+                      value={value}
+                      onChange={(e) => {
+                        onChange(e);
+                      }}
+                      mask="__:__ _"
+                      inputFormat="hh:mm a"
+                      label="Meeting time"
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+            </Stack>
+          </Grid>
+          <Grid container item xs={6}>
+            <Typography sx={{ fontWeight: 'bold' }}>
+              Set the meeting location
+            </Typography>
+            <Box sx={{ width: '100%', height: '100%' }}>
+              <Controller
+                control={control}
+                name="meetingLocation"
+                render={({ field: { onChange, value } }) => (
+                  <MapLocation
+                    showMarker={value}
+                    onChange={onChange}
+                    edit={true}
+                  />
+                )}
+              />
+            </Box>
+          </Grid>
+        </>
       );
     }
     return <></>;
@@ -208,122 +315,131 @@ const CreateRoute = ({ user }: { user: User }) => {
           overflow: 'auto',
         }}
       >
-        <Grid sx={{ mt: '10px' }} container direction="row">
-          <Grid item xs={6}>
-            <Stack spacing={3}>
-              <Typography variant="h4">Create your route</Typography>
-              <TextField
-                {...register('name')}
-                size="small"
-                type="text"
-                label="Name"
-                variant="outlined"
-              />
-              <Controller
-                control={control}
-                name="description"
-                render={({ field: { onChange, ...field } }) => (
-                  <Box>
-                    <Typography>Description</Typography>
-                    <Editor
-                      {...field}
-                      onEditorChange={onChange}
-                      apiKey="ddx2tyrwzirbdmwssqvuisccxytuf76t0z5kawg9eds75t8j"
-                      initialValue={' '}
-                      init={{
-                        height: '280px',
-                        width: '100%',
-                        label: 'Description',
-                        menubar: false,
-                        resize: false,
-                        toolbar:
-                          'undo redo | formatselect | ' +
-                          'bold italic backcolor | alignleft aligncenter ' +
-                          'alignright alignjustify | bullist numlist outdent indent | ' +
-                          'removeformat',
-                        content_style:
-                          'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                      }}
-                    />
-                  </Box>
-                )}
-              />
-              <UploadCoverPhoto />
-              <TextField
-                {...register('difficulty')}
-                size="small"
-                select
-                label="Difficulty"
-                variant="outlined"
-              >
-                <MenuItem value="easy">Easy</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="hard">Hard</MenuItem>
-              </TextField>
-              <TextField
-                {...register('type')}
-                size="small"
-                select
-                label="Route type"
-                variant="outlined"
-              >
-                <MenuItem value="hiking">Hiking</MenuItem>
-                <MenuItem value="kayaking">Kayaking</MenuItem>
-                <MenuItem value="cycling">Cycling</MenuItem>
-                <MenuItem value="running">Running</MenuItem>
-                <MenuItem value="viaferrata">Via Ferrata</MenuItem>
-              </TextField>
-              <UploadKml />
-              <TextField
-                {...register('distance')}
-                size="small"
-                type="text"
-                label="Distance"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">m</InputAdornment>
-                  ),
-                }}
-              />
-              <TextField
-                {...register('length')}
-                size="small"
-                type="text"
-                label="Time length"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">minute</InputAdornment>
-                  ),
-                }}
-              />
-              <FormControl component="fieldset">
-                <FormControlLabel
-                  control={
-                    <Switch
-                      name="public"
-                      {...register('public')}
-                      color="primary"
-                    />
-                  }
-                  label="Group tour"
-                  labelPlacement="end"
+        <Grid container direction="column">
+          <Grid xs={6} sx={{ mt: '10px' }} container item>
+            <Grid item xs={6}>
+              <Stack spacing={3}>
+                <Typography variant="h4">Create your route</Typography>
+                <TextField
+                  {...register('name')}
+                  size="small"
+                  type="text"
+                  label="Name"
+                  variant="outlined"
                 />
-              </FormControl>
-              <GroupTour />
-              <Button variant="contained" onClick={handleFormSubmit}>
-                CREATE
-              </Button>
-            </Stack>
+                <Controller
+                  control={control}
+                  name="description"
+                  render={({ field: { onChange, ...field } }) => (
+                    <Box>
+                      <Typography>Description</Typography>
+                      <Editor
+                        {...field}
+                        onEditorChange={onChange}
+                        apiKey="ddx2tyrwzirbdmwssqvuisccxytuf76t0z5kawg9eds75t8j"
+                        initialValue={' '}
+                        init={{
+                          height: '280px',
+                          width: '100%',
+                          label: 'Description',
+                          menubar: false,
+                          resize: false,
+                          toolbar:
+                            'undo redo | formatselect | ' +
+                            'bold italic backcolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent | ' +
+                            'removeformat',
+                          content_style:
+                            'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                        }}
+                      />
+                    </Box>
+                  )}
+                />
+                <UploadCoverPhoto />
+                <TextField
+                  {...register('difficulty')}
+                  size="small"
+                  select
+                  label="Difficulty"
+                  variant="outlined"
+                >
+                  <MenuItem value="easy">Easy</MenuItem>
+                  <MenuItem value="medium">Medium</MenuItem>
+                  <MenuItem value="hard">Hard</MenuItem>
+                </TextField>
+                <TextField
+                  {...register('type')}
+                  size="small"
+                  select
+                  label="Route type"
+                  variant="outlined"
+                >
+                  <MenuItem value="hiking">Hiking</MenuItem>
+                  <MenuItem value="kayaking">Kayaking</MenuItem>
+                  <MenuItem value="cycling">Cycling</MenuItem>
+                  <MenuItem value="running">Running</MenuItem>
+                  <MenuItem value="viaferrata">Via Ferrata</MenuItem>
+                </TextField>
+                <UploadKml />
+                <TextField
+                  {...register('distance')}
+                  size="small"
+                  type="text"
+                  label="Distance"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">m</InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  {...register('length')}
+                  size="small"
+                  type="text"
+                  label="Time length"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">minute</InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        name="public"
+                        {...register('public')}
+                        color="primary"
+                      />
+                    }
+                    label="Organized group tour"
+                    labelPlacement="end"
+                  />
+                </FormControl>
+              </Stack>
+            </Grid>
+            <Grid item xs={6}>
+              {coordinates.length > 0 && (
+                <Map
+                  coordinates={coordinates as unknown as LatLngExpression[][]}
+                />
+              )}
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            {coordinates.length > 0 && (
-              <Map
-                coordinates={coordinates as unknown as LatLngExpression[][]}
-              />
-            )}
+          <Grid xs={6} container item>
+            <GroupTour />
           </Grid>
+          <Button
+            sx={{ mt: '2%' }}
+            variant="contained"
+            onClick={handleFormSubmit}
+          >
+            CREATE
+          </Button>
         </Grid>
       </Paper>
+      <DevTool control={control} />
     </Box>
   );
 };

@@ -12,19 +12,21 @@ datasource db {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  email          String    @unique
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  email          String         @unique
   firstName      String
   lastName       String
+  role           String         @default("user")
   phoneNumber    String?
   description    String?
   profilePicture String?
   password       String
-  CreatedRoutes  Route[]   @relation("Created")
+  CreatedRoutes  Route[]        @relation("Created")
   JoinedRoutes   Route[]
-  Comment        Comment[]
+  Comments       Comment[]
+  Notifications  Notification[]
 }
 
 model Route {
@@ -39,8 +41,9 @@ model Route {
   distance         String
   length           String
   groupTour        Boolean
+  approved         Boolean?
   track            String?
-  meetingLocation  String?
+  meetingLocation  Float[]
   meetingTime      String?
   price            String?
   stripePrice      String?
@@ -61,4 +64,14 @@ model Comment {
   userId    Int
   Route     Route    @relation(fields: [routeId], references: [id])
   routeId   Int
+}
+
+model Notification {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  content          String
+  read             Boolean
+  redirectLocation String?
+  user             User     @relation(fields: [userId], references: [id])
+  userId           Int
 }
