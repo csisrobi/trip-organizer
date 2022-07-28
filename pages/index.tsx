@@ -30,16 +30,6 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
 };
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
   try {
     const routes = await prisma.route.findMany({
       select: {

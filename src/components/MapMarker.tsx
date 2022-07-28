@@ -19,14 +19,13 @@ const MapMarker = ({
   showMarker: LatLngExpression;
   onChange?: Function;
   edit: boolean;
-  height: string;
+  height?: string;
 }) => {
   const mapRef = useRef();
   const center = {
     lat: showMarker ? showMarker[0] : 45.9442858,
     lng: showMarker ? showMarker[1] : 25.0094303,
   };
-  console.log(edit);
   const [map, setMap] = useState(null);
 
   function LocationMarker() {

@@ -170,25 +170,25 @@ const ViewRoute = ({ id }: { id: string }) => {
           <Stack sx={{ width: '100%' }} spacing={1}>
             <Box display="flex">
               <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                Start date:
+                {t('startDate')}:
               </Typography>
               <Typography>{route.startDate}</Typography>
             </Box>
             <Box display="flex">
               <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                End date:
+                {t('endDate')}:
               </Typography>
               <Typography>{route.endDate}</Typography>
             </Box>
             <Box display="flex">
               <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                Meeting time:
+                {t('meetingTime')}:
               </Typography>
               <Typography>{route.meetingTime}</Typography>
             </Box>
             <Box sx={{ width: '100%', height: '200px' }}>
               <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                Meeting location
+                {t('meetingLocation')}
               </Typography>
               <MapMarker
                 height={'170px'}
@@ -199,7 +199,7 @@ const ViewRoute = ({ id }: { id: string }) => {
             <Box>
               <Box display="flex">
                 <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                  Participating user numbers:
+                  {t('partUserNum')}:
                 </Typography>
                 <Typography>
                   {route.ParticipantUsers.length}
@@ -212,20 +212,20 @@ const ViewRoute = ({ id }: { id: string }) => {
                 route.ParticipantUsers.find(
                   (pu) => pu.id === session.user.id,
                 ) ? (
-                  <Button>LEAVE</Button>
+                  <Button>{t('leave')}</Button>
                 ) : (
-                  <Button onClick={joinTour}>JOIN</Button>
+                  <Button onClick={joinTour}>{t('join')}</Button>
                 )
               ) : route.ParticipantUsers.find(
                   (pu) => pu.id === session.user.id,
                 ) ? (
                 <Typography sx={{ fontWeight: 'bold' }}>
-                  Thank you for joining us!
+                  {t('thxForJoining')}
                 </Typography>
               ) : (
                 <Box marginTop="2%" display="flex" alignItems="center">
                   <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                    Tour price:
+                    {t('tourPrice')}:
                   </Typography>
                   <Typography
                     sx={{ marginRight: '2%' }}
@@ -235,7 +235,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                     variant="outlined"
                     startIcon={<MdCreditCard />}
                   >
-                    Pay now
+                    {t('payNow')}
                   </Button>
                 </Box>
               )}
@@ -365,7 +365,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                   onChange={(e, newValue) => setActiveTab(newValue)}
                 >
                   <Tab label={t('routeDetails')} {...a11yProps(0)} />
-                  <Tab label="Tour informations" {...a11yProps(1)} />
+                  <Tab label={t('tourInformations')} {...a11yProps(1)} />
                 </Tabs>
               </Box>
               <TabPanel value={activeTab} index={0}>
@@ -373,17 +373,17 @@ const ViewRoute = ({ id }: { id: string }) => {
                   <Box>
                     <Stack direction="row" spacing={4}>
                       <Box>
-                        <Typography>Difficulty</Typography>
+                        <Typography>{t('diff')}</Typography>
                         <DifficultyIcon />
                       </Box>
                       <Box>
-                        <Typography>Distance</Typography>
+                        <Typography>{t('distance')}</Typography>
                         <Typography>
                           {(parseInt(route.distance) / 1000).toFixed(1)}km
                         </Typography>
                       </Box>
                       <Box>
-                        <Typography>Duration</Typography>
+                        <Typography>{t('duration')}</Typography>
                         <Typography>
                           {`${Math.floor(parseInt(route.length) / 60)}:${
                             parseInt(route.length) % 60
@@ -393,19 +393,21 @@ const ViewRoute = ({ id }: { id: string }) => {
                         </Typography>
                       </Box>
                       <Box>
-                        <Typography>Type</Typography>
+                        <Typography>{t('type')}</Typography>
                         <TypeIcon />
                       </Box>
                     </Stack>
                   </Box>
                   <Box>
                     <Typography sx={{ fontWeight: 'bold' }}>
-                      Route description
+                      {t('routeDescription')}
                     </Typography>
                     <Box>{parse(route.description)}</Box>
                   </Box>
                   <Box>
-                    <Typography sx={{ fontWeight: 'bold' }}>Galery</Typography>
+                    <Typography sx={{ fontWeight: 'bold' }}>
+                      {t('galery')}
+                    </Typography>
                     <Image
                       width="900"
                       height="400"
@@ -415,7 +417,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                   </Box>
                   <Box>
                     <Typography sx={{ fontWeight: 'bold' }}>
-                      {route.groupTour ? 'Organizer' : 'Creator'}
+                      {route.groupTour ? t('organizer') : t('creator')}
                     </Typography>
                     <Stack direction="row" spacing={3}>
                       <Link href={`/profile/${route.CreatorUser.id}`}>
@@ -425,11 +427,11 @@ const ViewRoute = ({ id }: { id: string }) => {
                       </Link>
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography>
-                          Name: {route.CreatorUser.lastName}{' '}
+                          {t('name')}: {route.CreatorUser.lastName}{' '}
                           {route.CreatorUser.firstName}
                         </Typography>
                         <Typography>
-                          Email: {route.CreatorUser.email}
+                          {t('email')}: {route.CreatorUser.email}
                         </Typography>
                       </Box>
                     </Stack>
@@ -468,7 +470,7 @@ export async function getServerSideProps(context) {
         },
       };
     }
-
+    
     return {
       props: {
         id,

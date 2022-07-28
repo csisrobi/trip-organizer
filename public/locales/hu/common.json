@@ -1,3 +1,25 @@
 {
-  "routeDetails": "Tura reszletek"
+  "routeDetails": "Utvonal reszletek",
+  "tourInformations":"Tura informaciok",
+  "startDate":"Kezdesi datum",
+  "endDate":"Vegzesi datum",
+  "meetingTime":"Talalkozas ideje",
+  "meetingLocation":"Talalkozas helye",
+  "partUserNum": "Resztvevo emberek szama",
+  "tourPrice": "Bejelentkezesi osszeg",
+  "leaveYourComment":"Ird le velemenyed",
+  "routeDescription":"Utvonal leiras",
+  "diff":"Nehezseg",
+  "distance":"Tav",
+  "duration":"Idohossz",
+  "type":"Tipus",
+  "galery":"Galeria",
+  "organizer":"Szervezo",
+  "creator":"Letrehozo",
+  "name":"Nev",
+  "email":"Email",
+  "join":"Csatlakozz",
+  "leave":"Elhagy",
+  "thxForJoining":"Koszonjuk, hogy velunk tart!",
+  "payNow":"Kifizetnem most"
 }

@@ -72,7 +72,6 @@ const CreateRoute = ({ user }: { user: User }) => {
   };
   const handleFormSubmit = React.useMemo(() => {
     return handleSubmit((data) => {
-      console.log(data);
       const formData = new FormData();
       formData.append('userId', user.id.toString());
       formData.append('name', data.name);

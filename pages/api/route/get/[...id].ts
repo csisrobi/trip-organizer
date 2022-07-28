@@ -4,7 +4,6 @@ import prisma from '../../../../lib/prisma';
 
 const get = async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
-  console.log(id);
   if (id[0] !== 'all') {
     let route;
     try {

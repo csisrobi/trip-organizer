@@ -23,6 +23,7 @@ const Login = () => {
         height: '100vh',
         width: '100vw',
         backgroundSize: 'cover',
+        backgroundImage: `url(${'./tripBG.jpg'})`,
       }}
     >
       <Paper

@@ -15,7 +15,7 @@ export const appTheme = createTheme({
           color: 'black',
           backgroundColor: '#ad78a4',
           '&:hover': {
-            background: '#fcf0ca',
+            background: '#5f558d',
           },
         },
       },

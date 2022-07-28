@@ -20,7 +20,7 @@ import Link from 'next/link';
 export const TripCard = ({ route }: { route: Route }) => {
   return (
     <Link href={`/route/view/${route.id}`}>
-      <Card sx={{ maxWidth: 345, maxHeight: '70%' }}>
+      <Card sx={{ maxWidth: 345, maxHeight: '70%', cursor: 'pointer' }}>
         <CardHeader
           avatar={
             <Tooltip

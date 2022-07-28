@@ -30,3 +30,8 @@ export const createComment = (body: {
   routeId: number;
   content: string;
 }) => fetcher('/route/comment', body);
+
+export const readNotification = (
+  props: number | 'all',
+  body?: { userId: number },
+) => fetcher(`/notification/read/${props}`, body);

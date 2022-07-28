@@ -3,24 +3,57 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
+import { useSession } from 'next-auth/react';
+import { User } from '@prisma/client';
+import useSWR from 'swr';
+import fetcher from '../../../lib/fetcher';
+import Link from 'next/link';
+import { Badge, Fade, Paper, Stack, Typography } from '@mui/material';
+import {
+  MdNotifications,
+  MdOutlineTimer,
+  MdMail,
+  MdArrowBackIosNew,
+} from 'react-icons/md';
+import { useState } from 'react';
+import moment from 'moment';
+import { useRouter } from 'next/router';
+import { readNotification } from '../../../lib/mutations';
 const pages = [];
 const settings = [];
 
 export const Layout = ({ children }) => {
+  const { data: session } = useSession();
+  const { data: user } = useSWR<User>(
+    `/user/get/${session ? session.user.id : undefined}`,
+    fetcher,
+  );
+  const router = useRouter();
+  const [open, setOpen] = useState<boolean>(false);
+
+  const read = async (notificationId?: number) =>
+    notificationId
+      ? await readNotification(notificationId)
+      : await readNotification('all', { userId: session.user.id });
+
   return (
-    <Box width="100vw" height="100vh" sx={{ overflow: 'hidden' }}>
+    <Box
+      width="100vw"
+      height="100vh"
+      sx={{ overflow: 'hidden', background: `url(${'./tripBG.jpg'})` }}
+    >
       <Box height="80px" position="absolute" top="0">
-        <AppBar sx={{ height: '80px' }}>
-          <Container maxWidth="xl">
+        <AppBar sx={{ height: '60px', background: '#434870' }}>
+          <Container
+            maxWidth="xl"
+            sx={{ display: 'flex', justifyContent: 'flex-end' }}
+          >
             <Toolbar disableGutters>
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+              <Box sx={{ flexGrow: 1 }}>
                 {pages.map((page) => (
                   <Button
                     key={page}
@@ -32,15 +65,176 @@ export const Layout = ({ children }) => {
                 ))}
               </Box>
 
-              <Box sx={{ flexGrow: 0 }}>
-                <Tooltip title="Open settings">
-                  <IconButton sx={{ p: 0 }}>
-                    <Avatar
-                      alt="Remy Sharp"
-                      //src="/static/images/avatar/2.jpg"
-                    />
-                  </IconButton>
-                </Tooltip>
+              <Box
+                sx={{
+                  flexGrow: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  float: 'right',
+                }}
+              >
+                {session ? (
+                  <>
+                    {router.pathname !== '/' && (
+                      <MdArrowBackIosNew
+                        style={{ fontSize: '50px', cursor: 'pointer' }}
+                        onClick={() => router.push('/')}
+                      />
+                    )}
+                    <IconButton sx={{ p: 0, mr: '10%' }}>
+                      <Avatar
+                        src={`/profilePictures/${
+                          user ? user.profilePicture : ''
+                        }`}
+                      />
+                    </IconButton>
+                    <Tooltip
+                      open={open}
+                      placement="bottom-end"
+                      TransitionComponent={Fade}
+                      componentsProps={{
+                        tooltip: {
+                          style: {
+                            backgroundColor: 'inherit',
+                          },
+                        },
+                      }}
+                      title={
+                        <Paper
+                          sx={{
+                            width: '500px',
+                            border: '1px solid black',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              height: '30px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              backgroundColor: '#434870',
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontWeight: 'bold',
+                                fontSize: '18px',
+                                flexGrow: 1,
+                                ml: '4%',
+                              }}
+                            >
+                              Notifications
+                            </Typography>
+                            <Typography
+                              sx={{
+                                fontWeight: 'bold',
+                                fontSize: '15px',
+                                mr: '4%',
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  textDecoration: 'underline',
+                                },
+                              }}
+                              onClick={() => read()}
+                            >
+                              Read all
+                            </Typography>
+                          </Box>
+                          <Stack
+                            sx={{ maxHeight: '200px', overflow: 'scroll' }}
+                          >
+                            {user &&
+                              user.Notifications &&
+                              user.Notifications.map((noti, index) => (
+                                <Box
+                                  key={index}
+                                  sx={{
+                                    cursor: 'pointer',
+                                    height: '66px',
+                                    backgroundColor: noti.read
+                                      ? 'white'
+                                      : 'lightblue',
+                                    p: '1%',
+                                  }}
+                                  onClick={() => {
+                                    if (!noti.read) {
+                                      read(noti.id);
+                                    }
+                                    if (noti.redirectLocation) {
+                                      router.push(`${noti.redirectLocation}`);
+                                    }
+                                  }}
+                                >
+                                  <Box
+                                    height="60%"
+                                    display="flex"
+                                    alignItems="center"
+                                  >
+                                    <MdMail
+                                      style={{
+                                        fontSize: '15px',
+                                        marginRight: '2%',
+                                      }}
+                                    />
+                                    <Typography sx={{ fontWeight: 'bold' }}>
+                                      {noti.content}
+                                    </Typography>
+                                  </Box>
+                                  <Box
+                                    display="flex"
+                                    alignItems="center"
+                                    height="40%"
+                                  >
+                                    <MdOutlineTimer
+                                      style={{
+                                        fontSize: '15px',
+                                        marginRight: '2%',
+                                      }}
+                                    />
+                                    <Typography sx={{ fontWeight: 'bold' }}>
+                                      {moment(noti.createdAt).format(
+                                        'MMMM Do YYYY, h:mm:ss a',
+                                      )}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              ))}
+                          </Stack>
+                        </Paper>
+                      }
+                    >
+                      <Badge
+                        onClick={() => setOpen(!open)}
+                        badgeContent={
+                          user && user.Notifications
+                            ? user.Notifications.filter((noti) => !noti.read)
+                                .length
+                            : 0
+                        }
+                        componentsProps={{
+                          badge: {
+                            style: {
+                              backgroundColor: '#ffecc4',
+                              color: 'black',
+                            },
+                          },
+                        }}
+                      >
+                        <MdNotifications
+                          style={{
+                            cursor: 'pointer',
+                            color: 'white',
+                            fontSize: '40px',
+                          }}
+                        />
+                      </Badge>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <Link href={'/login'}>
+                    <Button>SIGN IN</Button>
+                  </Link>
+                )}
               </Box>
             </Toolbar>
           </Container>
