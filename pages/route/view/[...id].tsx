@@ -283,9 +283,13 @@ const ViewRoute = ({ id }: { id: string }) => {
                   >
                     <Grid container sx={{ width: '100%', height: '100%' }}>
                       <Grid item xs={1}>
-                        <Avatar
-                          src={`/profilePictures/${comment.user.profilePicture}`}
-                        />
+                        <Avatar>
+                          <Image
+                            src={`/profilePictures/${comment.user.profilePicture}`}
+                            alt="profile"
+                            layout="fill"
+                          />
+                        </Avatar>
                       </Grid>
                       <Grid
                         container
@@ -372,18 +376,42 @@ const ViewRoute = ({ id }: { id: string }) => {
                 <Stack spacing={3}>
                   <Box>
                     <Stack direction="row" spacing={4}>
-                      <Box>
-                        <Typography>{t('diff')}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                          {t('diff')}
+                        </Typography>
                         <DifficultyIcon />
                       </Box>
-                      <Box>
-                        <Typography>{t('distance')}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                          {t('distance')}
+                        </Typography>
                         <Typography>
                           {(parseInt(route.distance) / 1000).toFixed(1)}km
                         </Typography>
                       </Box>
-                      <Box>
-                        <Typography>{t('duration')}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                          {t('duration')}
+                        </Typography>
                         <Typography>
                           {`${Math.floor(parseInt(route.length) / 60)}:${
                             parseInt(route.length) % 60
@@ -392,8 +420,16 @@ const ViewRoute = ({ id }: { id: string }) => {
                           } h`}
                         </Typography>
                       </Box>
-                      <Box>
-                        <Typography>{t('type')}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                          {t('type')}
+                        </Typography>
                         <TypeIcon />
                       </Box>
                     </Stack>
@@ -470,7 +506,7 @@ export async function getServerSideProps(context) {
         },
       };
     }
-    
+
     return {
       props: {
         id,
