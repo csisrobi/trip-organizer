@@ -11,7 +11,11 @@ const join = async (req: NextApiRequest, res: NextApiResponse) => {
       where: { id: userId },
       data: {
         JoinedRoutes: {
-          connect: [{ id: routeId }],
+          create: [
+            {
+              route: { connect: { id: parseInt(routeId) } },
+            },
+          ],
         },
       },
     });

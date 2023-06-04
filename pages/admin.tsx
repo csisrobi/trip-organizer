@@ -2,10 +2,34 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { getSession } from 'next-auth/react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { MdDone, MdClear } from 'react-icons/md';
+import useSWR, { useSWRConfig } from 'swr';
+import { routeApproval } from '../lib/mutations';
 
-const Admin = ({ routes }: { routes: { id: number; name: string }[] }) => {
+type TempRoute = {
+  id: number;
+  name: string;
+};
+
+const Admin = ({ routes }: { routes: TempRoute[] }) => {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
+
+  const [routesData, setRoutesData] = useState<TempRoute[]>(routes);
+  const { data: upToDateRoutes } = useSWR<TempRoute[]>('/route/get/pending');
+
+  useEffect(() => {
+    if (upToDateRoutes) {
+      setRoutesData(upToDateRoutes);
+    }
+  }, [upToDateRoutes]);
+
+  const onClickApproval = async (approved: boolean, route: TempRoute) => {
+    await routeApproval(route.id, { approved });
+    mutate('/route/get/pending');
+  };
+
   return (
     <Box
       sx={{
@@ -19,7 +43,7 @@ const Admin = ({ routes }: { routes: { id: number; name: string }[] }) => {
         <Typography sx={{ fontWeight: 'bold' }}>
           Tours waiting for approval
         </Typography>
-        {routes.map((r, id) => (
+        {routesData.map((r, id) => (
           <Box
             key={id}
             onClick={() => router.push(`/route/view/${r.id}`)}
@@ -39,7 +63,7 @@ const Admin = ({ routes }: { routes: { id: number; name: string }[] }) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('APPROVE');
+                onClickApproval(true, r);
               }}
               startIcon={<MdDone />}
               sx={{
@@ -54,7 +78,7 @@ const Admin = ({ routes }: { routes: { id: number; name: string }[] }) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('REJECT');
+                onClickApproval(false, r);
               }}
               startIcon={<MdClear />}
               sx={{
@@ -84,9 +108,18 @@ export async function getServerSideProps(context) {
       };
     }
 
+    if(session.user.role !== 'admin') {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
     const routes = await prisma.route.findMany({
       where: {
-        approved: false,
+        approval: 'pending',
       },
       select: {
         id: true,

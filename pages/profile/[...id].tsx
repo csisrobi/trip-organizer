@@ -3,12 +3,60 @@ import { User } from '@prisma/client';
 import prisma from '../../lib/prisma';
 import { Avatar, Box, Grid, Paper, Stack, Typography } from '@mui/material';
 import { MdEmail, MdPerson, MdPhone } from 'react-icons/md';
+import { mToKm } from '../../utils/mToKm';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 type Props = {
   user: User;
 };
 //TODO: RESTYLE/ 1 CARD WITH AVATAR AND INFORMATION, UNDER IT DESCRIPTION, UNDER IT STAT
-const Profile = ({ user }: Props) => {
+const Profile = ({ user }) => {
+  const data1 = {
+    labels: ['Hiking', 'Cycling', 'Via Ferrata', 'Running', 'Kayaking'],
+    datasets: [
+      {
+        data: [1, 3, 4, 5, 6],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const data2 = {
+    labels: ['Easy', 'Medium', 'Hard'],
+    datasets: [
+      {
+        data: [12, 19, 3],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
     <Box
       width="100%"
@@ -90,7 +138,9 @@ const Profile = ({ user }: Props) => {
             <Grid container item xs={8} direction="column">
               <Grid container item>
                 <Box>
-                  <Typography>Description</Typography>
+                  <Typography sx={{ fontWeight: 'bold' }}>
+                    Description
+                  </Typography>
                   <Typography
                     variant="body1"
                     dangerouslySetInnerHTML={{ __html: user.description }}
@@ -99,8 +149,27 @@ const Profile = ({ user }: Props) => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid container item xs={8} sx={{ backgroundColor: 'red' }}>
-            STATISZTIKA
+          <Grid container item xs={8} direction="column" sx={{ pl: '5%' }}>
+            <Grid container item xs={1}>
+              <Typography sx={{ fontWeight: 'bold' }}>
+                Completed km:{' '}
+                {user.FinishedRoutes &&
+                  mToKm(
+                    user.FinishedRoutes.map((fr) =>
+                      parseInt(fr.route.distance),
+                    ).reduce((a, b) => a + b),
+                  )}
+              </Typography>
+            </Grid>
+            <Grid container item xs={11}>
+              <Grid container item xs={6}>
+                <Pie data={data1} />
+              </Grid>
+              <Grid container item xs={6}>
+                {' '}
+                <Pie data={data2} />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Paper>
@@ -123,6 +192,17 @@ export async function getServerSideProps(context) {
         phoneNumber: true,
         description: true,
         profilePicture: true,
+        FinishedRoutes: {
+          select: {
+            route: {
+              select: {
+                difficulty: true,
+                type: true,
+                distance: true,
+              },
+            },
+          },
+        },
       },
     });
     return {

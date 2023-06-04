@@ -22,6 +22,9 @@ export const createRoute = (body: FormData) => formDataFetcher('/route', body);
 export const joinRoute = (body: { userId: number; routeId: number }) =>
   fetcher('/route/join', body);
 
+export const closeRoute = (body: { routeId: number }) =>
+  fetcher('/route/end', body);
+
 export const payRoute = (body: { stripePrice: string; routeId: number }) =>
   fetcher('/payment', body);
 
@@ -35,3 +38,10 @@ export const readNotification = (
   props: number | 'all',
   body?: { userId: number },
 ) => fetcher(`/notification/read/${props}`, body);
+
+export const routeApproval = (
+  routeId: number,
+  body: {
+    approved: boolean;
+  },
+) => fetcher(`/route/approval/${routeId}`, body);

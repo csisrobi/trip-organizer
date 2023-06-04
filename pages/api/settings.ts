@@ -28,9 +28,6 @@ const settings = async (req: NextApiRequest, res: NextApiResponse) => {
       let user;
       const {
         id,
-        firstName,
-        lastName,
-        email,
         phoneNumber,
         description,
         newPassword,
@@ -48,12 +45,9 @@ const settings = async (req: NextApiRequest, res: NextApiResponse) => {
         user = await prisma.user.update({
           where: { id: parseInt(id) },
           data: {
-            email,
             password: newPassword
               ? bcrypt.hashSync(newPassword, salt)
               : undefined,
-            firstName: firstName || '',
-            lastName: lastName || '',
             phoneNumber: phoneNumber || '',
             description: description || '',
             profilePicture: newFileName || oldData.profilePicture,

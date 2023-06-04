@@ -42,11 +42,13 @@ const nextAuthOptions = (req: NextApiRequest, res: NextApiResponse) => {
       jwt: ({ token, user }) => {
         if (user) {
           token.id = user.id;
+          token.role = user.role;
         }
         return token;
       },
       session: ({ session, token }) => {
         if (token) {
+          session.user.role = token.role;
           session.user.id = token.id;
         }
         return session;

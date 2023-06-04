@@ -4,7 +4,27 @@ import prisma from '../../../../lib/prisma';
 
 const get = async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
-  if (id[0] !== 'all') {
+  if (id[0] === 'pending') {
+    try {
+      const routes = await prisma.route.findMany({
+        where: {
+          approval: 'pending',
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      res.json(routes);
+      return;
+    } catch (e) {
+      console.log(e);
+      res.status(400);
+      res.json({ error: 'Internal error' });
+      return;
+    }
+  }
+  if (id[0] !== 'all' && id[0] !== 'tours') {
     let route;
     try {
       route = await prisma.route.findUnique({
@@ -21,7 +41,8 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
           distance: true,
           length: true,
           groupTour: true,
-          meetingLocation: true,
+          meetingLocationX: true,
+          meetingLocationY: true,
           meetingTime: true,
           stripePrice: true,
           price: true,
@@ -40,7 +61,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           ParticipantUsers: {
             select: {
-              id: true,
+              userId: true,
             },
           },
           Comments: {
@@ -59,12 +80,20 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
       res.json({ error: 'Internal error' });
       return;
     }
-
-    res.json(route);
+    const routeLocation = {
+      ...route,
+      meetingLocation: [route.meetingLocationX, route.meetingLocationY],
+    };
+    res.json(routeLocation);
+    return;
   } else {
     let routes;
     try {
       routes = await prisma.route.findMany({
+        where: {
+          approval: 'approved',
+          ...(id[0] === 'tours' && { groupTour: false }),
+        },
         select: {
           id: true,
           name: true,
@@ -74,6 +103,8 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
           groupTour: true,
           maxParticipants: true,
           coverPhoto: true,
+          distance: true,
+          length: true,
           CreatorUser: {
             select: {
               id: true,
@@ -85,7 +116,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           ParticipantUsers: {
             select: {
-              id: true,
+              userId: true,
             },
           },
         },
@@ -98,6 +129,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.json(routes);
+    return;
   }
 };
 

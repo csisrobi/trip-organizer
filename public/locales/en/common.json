@@ -21,5 +21,6 @@
   "join":"Join",
   "leave":"Leave",
   "thxForJoining":"Thank you for joining us!",
-  "payNow":"Pay now"
+  "payNow":"Pay now",
+  "closeTour":"Close tour"
 }

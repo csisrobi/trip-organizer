@@ -11,12 +11,12 @@ import L, { LatLngExpression } from 'leaflet';
 
 const MapDisplay = ({ coordinates }: { coordinates: LatLngExpression[][] }) => {
   const mapRef = useRef();
+  const [map, setMap] = useState(null);
+  const markers = [coordinates[0], coordinates[coordinates.length - 1]];
   const center = {
     lat: coordinates[(coordinates.length / 2).toFixed()][0] || 45.9442858,
     lng: coordinates[(coordinates.length / 2).toFixed()][1] || 25.0094303,
   };
-  const [map, setMap] = useState(null);
-  const markers = [coordinates[0], coordinates[coordinates.length - 1]];
   return (
     <MapContainer
       style={{ height: '600px', width: '100%' }}

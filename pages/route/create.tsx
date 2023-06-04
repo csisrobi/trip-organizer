@@ -80,10 +80,10 @@ const CreateRoute = ({ user }: { user: User }) => {
       formData.append('difficulty', data.difficulty);
       formData.append('description', data.description);
       formData.append('length', data.length);
-      formData.append('groupTour', data.public);
+      formData.append('groupTour', data.groupTour);
       formData.append('routeFile', data.routeFile);
       formData.append('coverPhoto', data.coverPhoto);
-      if (data.public === true) {
+      if (data.groupTour === true) {
         formData.append('maxParticipants', data.maxNumParticipants);
         formData.append('price', data.price);
         formData.append('meetingLocation[]', data.meetingLocation[0]);
@@ -161,6 +161,7 @@ const CreateRoute = ({ user }: { user: User }) => {
     return (
       <Box>
         <TextField
+          InputLabelProps={{ shrink: coverPhoto ? true : false }}
           label="Cover photo"
           value={coverPhoto ? coverPhoto.name : ''}
           size="small"
@@ -193,7 +194,7 @@ const CreateRoute = ({ user }: { user: User }) => {
   const GroupTour = () => {
     const groupTour = useWatch({
       control,
-      name: 'public',
+      name: 'groupTour',
     });
     if (groupTour) {
       return (
@@ -407,8 +408,8 @@ const CreateRoute = ({ user }: { user: User }) => {
                   <FormControlLabel
                     control={
                       <Switch
-                        name="public"
-                        {...register('public')}
+                        name="groupTour"
+                        {...register('groupTour')}
                         color="primary"
                       />
                     }

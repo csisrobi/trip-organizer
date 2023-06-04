@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Route" ALTER COLUMN "meetingLocation" SET DATA TYPE DOUBLE PRECISION[];

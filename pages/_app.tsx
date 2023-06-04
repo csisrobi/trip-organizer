@@ -10,6 +10,8 @@ import {
 import { Layout } from '../src/components/Layout';
 import { appWithTranslation } from 'next-i18next';
 import { appTheme } from '../src/theme';
+import { SWRConfig } from 'swr';
+import fetcher from '../lib/fetcher';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
@@ -18,15 +20,23 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
         <StyledEngineProvider injectFirst>
           <CssBaseline>
             <SnackbarProvider maxSnack={3}>
-              <Box sx={{}}>
-                {(Component as any).authPage ? (
-                  <Component {...pageProps} />
-                ) : (
-                  <Layout>
+              <SWRConfig
+                value={{
+                  //TODO: PUT IT BACK
+                  //refreshInterval: 5000,
+                  fetcher,
+                }}
+              >
+                <Box sx={{}}>
+                  {(Component as any).authPage ? (
                     <Component {...pageProps} />
-                  </Layout>
-                )}
-              </Box>
+                  ) : (
+                    <Layout>
+                      <Component {...pageProps} />
+                    </Layout>
+                  )}
+                </Box>
+              </SWRConfig>
             </SnackbarProvider>
           </CssBaseline>
         </StyledEngineProvider>

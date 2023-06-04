@@ -20,9 +20,6 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const form = new formidable.IncomingForm({ multiples: true });
     form.parse(req, async function (err, fields, files) {
-      const meetingLocation = fields.meetingLocation.map((num) =>
-        parseFloat(num),
-      );
       const coverPhoto = files.coverPhoto
         ? `${files.coverPhoto.newFilename}${files.coverPhoto.originalFilename}`
         : undefined;
@@ -44,14 +41,16 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
         startDate,
         endDate,
       } = fields;
-
-      const product = await stripe.products.create({
-        name: `${name} tour`,
-        default_price_data: {
-          currency: 'RON',
-          unit_amount: parseInt(price) * 100,
-        },
-      });
+      let product = undefined;
+      if (price) {
+        product = await stripe.products.create({
+          name: `${name} tour`,
+          default_price_data: {
+            currency: 'RON',
+            unit_amount: parseInt(price) * 100,
+          },
+        });
+      }
 
       const route = await prisma.route.create({
         data: {
@@ -66,12 +65,13 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           CreatorUser: { connect: { id: parseInt(userId) } },
           groupTour: groupTour === 'true',
           maxParticipants: parseInt(maxParticipants) || -1,
-          price,
-          meetingLocation,
+          price: price ? price : '0',
+          meetingLocationX: parseFloat(fields.meetingLocation[0]) || null,
+          meetingLocationY: parseFloat(fields.meetingLocation[1]) || null,
           meetingTime,
           startDate,
           endDate,
-          stripePrice: product.default_price,
+          stripePrice: product ? product.default_price : '',
         },
       });
 

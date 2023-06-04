@@ -15,12 +15,20 @@ import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import { GiHiking, GiMountainClimbing, GiCycling } from 'react-icons/gi';
-import { MdKayaking, MdDirectionsRun, MdStarRate } from 'react-icons/md';
+import {
+  MdKayaking,
+  MdDirectionsRun,
+  MdStarRate,
+  MdGroups,
+} from 'react-icons/md';
 import Image from 'next/image';
+import { mToKm } from '../../../utils/mToKm';
+import { mToH } from '../../../utils/mToH';
+import { mToRestM } from '../../../utils/mToRestM';
 
 export const TripCard = ({ route }: { route: Route }) => {
+  console.log(route);
   const { t } = useTranslation();
-
   const TypeIcon = () => {
     switch (route.type) {
       case 'hiking':
@@ -66,6 +74,15 @@ export const TripCard = ({ route }: { route: Route }) => {
     <Link href={`/route/view/${route.id}`}>
       <Card sx={{ maxWidth: 345, height: 320, cursor: 'pointer' }}>
         <CardHeader
+          sx={{
+            '	.MuiCardHeader-action': { marginTop: '2px', marginRight: '0px' },
+          }}
+          titleTypographyProps={{
+            sx: {
+              fontWeight: 'bold',
+              fontSize: '20px',
+            },
+          }}
           avatar={
             <Tooltip
               title={`${route.CreatorUser.lastName} ${route.CreatorUser.firstName}`}
@@ -79,10 +96,10 @@ export const TripCard = ({ route }: { route: Route }) => {
               </Avatar>
             </Tooltip>
           }
+          action={route.groupTour ? <MdGroups fontSize="35px" /> : undefined}
           title={route.name}
         />
         <CardMedia
-          sx={{ border: '0.5px solid black' }}
           component="img"
           height="150"
           image={`/coverPhotos/${route.coverPhoto}`}
@@ -110,9 +127,7 @@ export const TripCard = ({ route }: { route: Route }) => {
                 <Typography sx={{ fontWeight: 'bold' }}>
                   {t('distance')}
                 </Typography>
-                <Typography>
-                  {(parseInt(route.distance) / 1000).toFixed(1)}km
-                </Typography>
+                <Typography>{mToKm(route.distance).toFixed(1)}km</Typography>
               </Box>
               <Box
                 sx={{
@@ -125,11 +140,9 @@ export const TripCard = ({ route }: { route: Route }) => {
                   {t('duration')}
                 </Typography>
                 <Typography>
-                  {`${Math.floor(parseInt(route.length) / 60)}:${
-                    parseInt(route.length) % 60
-                  } - ${Math.floor(parseInt(route.length) / 60) + 1}:${
-                    parseInt(route.length) % 60
-                  } h`}
+                  {`${mToH(route.length)}:${mToRestM(route.length)}-${
+                    mToH(route.length) + 1
+                  }:${mToRestM(route.length)}h`}
                 </Typography>
               </Box>
               <Box

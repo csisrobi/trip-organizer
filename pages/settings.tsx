@@ -62,9 +62,6 @@ const Settings = ({ user }: Props) => {
     return handleSubmit((data) => {
       const formData = new FormData();
       formData.append('id', user.id.toString());
-      formData.append('firstName', data.firstName);
-      formData.append('lastName', data.lastName);
-      formData.append('email', data.email);
       formData.append('phoneNumber', data.phoneNumber);
       formData.append('description', data.description);
       if (data.newPassword) {
@@ -161,25 +158,24 @@ const Settings = ({ user }: Props) => {
               <Stack spacing={4} sx={{ width: '70%' }}>
                 <OutlinedInput
                   id="firstname"
-                  {...register('firstName')}
                   size="small"
                   sx={{ backgroundColor: 'white' }}
                   defaultValue={user.firstName}
-                  placeholder="First name"
+                  disabled
                 />
                 <OutlinedInput
-                  {...register('lastName')}
                   placeholder="Last name"
                   size="small"
                   sx={{ backgroundColor: 'white' }}
                   defaultValue={user.lastName}
+                  disabled
                 />
                 <OutlinedInput
-                  {...register('email')}
                   placeholder="Email"
                   size="small"
                   sx={{ backgroundColor: 'white' }}
                   defaultValue={user.email}
+                  disabled
                 />
                 <OutlinedInput
                   {...register('phoneNumber')}

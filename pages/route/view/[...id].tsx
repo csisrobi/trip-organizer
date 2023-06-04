@@ -20,6 +20,7 @@ import {
   joinRoute,
   payRoute,
   createComment,
+  closeRoute,
 } from '../../../lib/mutations';
 import { GiHiking, GiMountainClimbing, GiCycling } from 'react-icons/gi';
 import {
@@ -41,6 +42,9 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import moment from 'moment';
 import { getSession } from 'next-auth/react';
 import prisma from '../../../lib/prisma';
+import { mToKm } from '../../../utils/mToKm';
+import { mToRestM } from '../../../utils/mToRestM';
+import { mToH } from '../../../utils/mToH';
 
 type TabPanelProps = {
   children?: React.ReactNode;
@@ -48,10 +52,11 @@ type TabPanelProps = {
   value: number;
 };
 
+//TODO: SWR ONLY FOR COMMENTS, REST COME FROM SERVER
 const ViewRoute = ({ id }: { id: string }) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { data: route } = useSWR<Route>(`/route/get/${id}`, fetcher);
+  const { data: route } = useSWR<Route>(`/route/get/${id}`);
   const { enqueueSnackbar } = useSnackbar();
   const [coordinates, setCoordinates] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
@@ -120,6 +125,19 @@ const ViewRoute = ({ id }: { id: string }) => {
       </div>
     );
   };
+
+  const endTour = async () =>
+    await closeRoute({ routeId: route.id })
+      .then(() =>
+        enqueueSnackbar('Closed successfully', {
+          variant: 'success',
+        }),
+      )
+      .catch((e) =>
+        enqueueSnackbar(e, {
+          variant: 'error',
+        }),
+      );
 
   const joinTour = async () =>
     await joinRoute({ userId: session.user.id, routeId: route.id })
@@ -208,16 +226,16 @@ const ViewRoute = ({ id }: { id: string }) => {
                     : ''}
                 </Typography>
               </Box>
-              {!route.price ? (
+              {!route.price || route.price === '0' ? (
                 route.ParticipantUsers.find(
-                  (pu) => pu.id === session.user.id,
+                  (pu) => pu.userId === session.user.id,
                 ) ? (
                   <Button>{t('leave')}</Button>
                 ) : (
                   <Button onClick={joinTour}>{t('join')}</Button>
                 )
               ) : route.ParticipantUsers.find(
-                  (pu) => pu.id === session.user.id,
+                  (pu) => pu.userId === session.user.id,
                 ) ? (
                 <Typography sx={{ fontWeight: 'bold' }}>
                   {t('thxForJoining')}
@@ -232,7 +250,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                   >{`${route.price}RON`}</Typography>
                   <Button
                     onClick={onPayment}
-                    variant="outlined"
+                    variant="contained"
                     startIcon={<MdCreditCard />}
                   >
                     {t('payNow')}
@@ -363,15 +381,18 @@ const ViewRoute = ({ id }: { id: string }) => {
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: '2%' }}>
             <Paper sx={{ p: '2%', width: '60%' }} elevation={15}>
               <Typography variant="h2">{route.name}</Typography>
-              <Box>
-                <Tabs
-                  value={activeTab}
-                  onChange={(e, newValue) => setActiveTab(newValue)}
-                >
-                  <Tab label={t('routeDetails')} {...a11yProps(0)} />
-                  <Tab label={t('tourInformations')} {...a11yProps(1)} />
-                </Tabs>
-              </Box>
+              {route.groupTour && (
+                <Box>
+                  <Tabs
+                    value={activeTab}
+                    onChange={(e, newValue) => setActiveTab(newValue)}
+                  >
+                    <Tab label={t('routeDetails')} {...a11yProps(0)} />
+                    <Tab label={t('tourInformations')} {...a11yProps(1)} />
+                  </Tabs>
+                </Box>
+              )}
+
               <TabPanel value={activeTab} index={0}>
                 <Stack spacing={3}>
                   <Box>
@@ -399,7 +420,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                           {t('distance')}
                         </Typography>
                         <Typography>
-                          {(parseInt(route.distance) / 1000).toFixed(1)}km
+                          {mToKm(route.distance).toFixed(1)}km
                         </Typography>
                       </Box>
                       <Box
@@ -413,11 +434,9 @@ const ViewRoute = ({ id }: { id: string }) => {
                           {t('duration')}
                         </Typography>
                         <Typography>
-                          {`${Math.floor(parseInt(route.length) / 60)}:${
-                            parseInt(route.length) % 60
-                          } - ${Math.floor(parseInt(route.length) / 60) + 1}:${
-                            parseInt(route.length) % 60
-                          } h`}
+                          {`${mToH(route.length)}:${mToRestM(route.length)} - ${
+                            mToH(route.length) + 1
+                          }:${mToRestM(route.length)} h`}
                         </Typography>
                       </Box>
                       <Box
@@ -451,26 +470,44 @@ const ViewRoute = ({ id }: { id: string }) => {
                       src={`/coverPhotos/${route.coverPhoto}`}
                     />
                   </Box>
-                  <Box>
-                    <Typography sx={{ fontWeight: 'bold' }}>
-                      {route.groupTour ? t('organizer') : t('creator')}
-                    </Typography>
-                    <Stack direction="row" spacing={3}>
-                      <Link href={`/profile/${route.CreatorUser.id}`}>
-                        <Avatar
-                          src={`/profilePictures/${route.CreatorUser.profilePicture}`}
-                        />
-                      </Link>
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography>
-                          {t('name')}: {route.CreatorUser.lastName}{' '}
-                          {route.CreatorUser.firstName}
-                        </Typography>
-                        <Typography>
-                          {t('email')}: {route.CreatorUser.email}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box>
+                      <Typography sx={{ fontWeight: 'bold' }}>
+                        {route.groupTour ? t('organizer') : t('creator')}
+                      </Typography>
+                      <Stack direction="row" spacing={3}>
+                        <Link href={`/profile/${route.CreatorUser.id}`}>
+                          <Avatar
+                            src={`/profilePictures/${route.CreatorUser.profilePicture}`}
+                          />
+                        </Link>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography>
+                            {t('name')}: {route.CreatorUser.lastName}{' '}
+                            {route.CreatorUser.firstName}
+                          </Typography>
+                          <Typography>
+                            {t('email')}: {route.CreatorUser.email}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      {session &&
+                        session.user.id === route.CreatorUser.id &&
+                        route.groupTour &&
+                        moment(route.endDate).isAfter() && (
+                          <Button onClick={endTour} sx={{ fontWeight: 'bold' }}>
+                            {t('closeTour')}
+                          </Button>
+                        )}
+                    </Box>
                   </Box>
                 </Stack>
               </TabPanel>
