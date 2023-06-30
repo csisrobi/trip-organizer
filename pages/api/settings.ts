@@ -26,12 +26,7 @@ const settings = async (req: NextApiRequest, res: NextApiResponse) => {
         ? `${files.file.newFilename}${files.file.originalFilename}`
         : undefined;
       let user;
-      const {
-        id,
-        phoneNumber,
-        description,
-        newPassword,
-      } = fields;
+      const { id, phoneNumber, description, newPassword } = fields;
       try {
         const oldData = await prisma.user.findUnique({
           where: {
@@ -58,6 +53,7 @@ const settings = async (req: NextApiRequest, res: NextApiResponse) => {
           await saveFile(newFileName, files.file.filepath);
         }
       } catch (e) {
+        console.log(e);
         res.status(404);
         res.json({ error: 'User not existing' });
       }

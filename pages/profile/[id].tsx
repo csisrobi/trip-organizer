@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { User } from '@prisma/client';
-import prisma from '../../lib/prisma';
 import { Avatar, Box, Grid, Paper, Stack, Typography } from '@mui/material';
-import { MdEmail, MdPerson, MdPhone } from 'react-icons/md';
-import { mToKm } from '../../utils/mToKm';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { MdEmail, MdPerson, MdPhone } from 'react-icons/md';
+import prisma from '../../lib/prisma';
+import { UserWithRelation } from '../../lib/types';
+import { mToKm } from '../../utils/mToKm';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 type Props = {
-  user: User;
+  user: UserWithRelation;
 };
 //TODO: RESTYLE/ 1 CARD WITH AVATAR AND INFORMATION, UNDER IT DESCRIPTION, UNDER IT STAT
-const Profile = ({ user }) => {
+const Profile = ({ user }: Props) => {
   const data1 = {
     labels: ['Hiking', 'Cycling', 'Via Ferrata', 'Running', 'Kayaking'],
     datasets: [
@@ -68,6 +67,7 @@ const Profile = ({ user }) => {
         sx={{
           width: '60%',
           height: '100%',
+          padding: 2,
         }}
       >
         <Grid
@@ -141,8 +141,7 @@ const Profile = ({ user }) => {
                   <Typography sx={{ fontWeight: 'bold' }}>
                     Description
                   </Typography>
-                  <Typography
-                    variant="body1"
+                  <span
                     dangerouslySetInnerHTML={{ __html: user.description }}
                   />
                 </Box>
@@ -155,9 +154,9 @@ const Profile = ({ user }) => {
                 Completed km:{' '}
                 {user.FinishedRoutes &&
                   mToKm(
-                    user.FinishedRoutes.map((fr) =>
-                      parseInt(fr.route.distance),
-                    ).reduce((a, b) => a + b),
+                    user.FinishedRoutes.map((fr) => parseInt(fr.route.distance))
+                      .reduce((a, b) => a + b, 0)
+                      .toString(),
                   )}
               </Typography>
             </Grid>

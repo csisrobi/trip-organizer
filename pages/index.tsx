@@ -11,6 +11,7 @@ import {
   Autocomplete,
   FormControlLabel,
   Checkbox,
+  Button,
 } from '@mui/material';
 import type { NextPage } from 'next';
 import { TripCard } from '../src/components/TripCard';
@@ -49,17 +50,16 @@ const routeDiff = [
 const Home: NextPage = ({ routes }: { routes: Route[] }) => {
   const { data: session } = useSession();
   const [showEveryTour, setShowEveryTour] = useState<boolean>(false);
-  const [routesData, setRoutesData] = useState<Route[]>(routes);
+  const [routesData, setRoutesData] = useState<Route[]>([]);
+  const [pagination, setPagination] = useState(1);
   const { data: upToDateRoutes } = useSWR<Route[]>(
     `/route/get/${session ? 'all' : 'tours'}`,
-    { refreshInterval: 5000 },
   );
-  console.log(routesData);
   useEffect(() => {
     if (upToDateRoutes) {
       setRoutesData(upToDateRoutes);
     }
-  }, [upToDateRoutes]);
+  }, [routesData, upToDateRoutes]);
 
   const [filterExpanded, setFilterExpanded] = useState<boolean>(false);
   const [filter, setFilter] = useState<Filter>({
@@ -295,6 +295,7 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
 
       <Grid container sx={{ width: '92%', mx: '4%', mt: '2%' }}>
         {routesData
+          .slice(0, pagination * 6)
           // .filter((route) => filterRoute(route))
           .map((route) => (
             <Grid key={route.id} item xs={7} lg={5} xl={3} sx={{ mb: '2%' }}>
@@ -302,6 +303,7 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
             </Grid>
           ))}
       </Grid>
+      <Button onClick={() => setPagination(pagination + 1)}>Paginate</Button>
     </Box>
   );
 };

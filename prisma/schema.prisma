@@ -20,7 +20,7 @@ model User {
   lastName       String
   role           String         @default("user")
   phoneNumber    String?
-  description    String?
+  description    String?        @db.LongText
   profilePicture String?
   password       String
   CreatedRoutes  Route[]        @relation("Created")
@@ -35,7 +35,7 @@ model Route {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   name             String         @unique
-  description      String
+  description      String         @db.LongText
   coverPhoto       String
   difficulty       String
   type             String
@@ -44,8 +44,8 @@ model Route {
   groupTour        Boolean
   approval         String         @default("pending")
   track            String?
-  meetingLocationX Float
-  meetingLocationY Float
+  meetingLocationX Float?
+  meetingLocationY Float?
   meetingTime      String?
   price            String?
   stripePrice      String?

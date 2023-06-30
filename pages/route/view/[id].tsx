@@ -45,6 +45,7 @@ import prisma from '../../../lib/prisma';
 import { mToKm } from '../../../utils/mToKm';
 import { mToRestM } from '../../../utils/mToRestM';
 import { mToH } from '../../../utils/mToH';
+import { CommentsWithRelation, RouteWithRelation } from '../../../lib/types';
 
 type TabPanelProps = {
   children?: React.ReactNode;
@@ -56,7 +57,7 @@ type TabPanelProps = {
 const ViewRoute = ({ id }: { id: string }) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { data: route } = useSWR<Route>(`/route/get/${id}`);
+  const { data: route, mutate } = useSWR<RouteWithRelation>(`/route/get/${id}`);
   const { enqueueSnackbar } = useSnackbar();
   const [coordinates, setCoordinates] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
@@ -182,6 +183,10 @@ const ViewRoute = ({ id }: { id: string }) => {
         content: activeComment,
       });
 
+    if (!route) {
+      return null;
+    }
+
     return (
       <Grid container>
         <Grid container item xs={5}>
@@ -211,7 +216,7 @@ const ViewRoute = ({ id }: { id: string }) => {
               <MapMarker
                 height={'170px'}
                 edit={false}
-                showMarker={route.meetingLocation}
+                showMarker={[route.meetingLocationX, route.meetingLocationY]}
               />
             </Box>
             <Box>
@@ -284,6 +289,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                   if (activeComment !== '') {
                     onComment();
                     setActiveComment('');
+                    mutate();
                   }
                 }}
               >
@@ -291,7 +297,8 @@ const ViewRoute = ({ id }: { id: string }) => {
               </Button>
             </Box>
             <Stack spacing={2}>
-              {route.Comments.slice(0)
+              {(route.Comments as CommentsWithRelation[])
+                .slice(0)
                 .reverse()
                 .map((comment, index) => (
                   <Paper

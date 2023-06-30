@@ -29,12 +29,13 @@ import { useRouter } from 'next/router';
 import { readNotification } from '../../../lib/mutations';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
+import { UserWithRelation } from '../../../lib/types';
 
 //TODO: SWR ONLY FOR NOTI, REST COME FROM SERVER
 export const Layout = ({ children }) => {
   const { data: session } = useSession();
-  const { data: user } = useSWR<User>(
-    `/user/get/${session ? session.user.id : undefined}`,
+  const { data: user } = useSWR<UserWithRelation>(
+    session ? `/user/get/${session.user.id}` : null,
   );
   const { pathname, asPath, query, push, locale } = useRouter();
   const [open, setOpen] = useState<boolean>(false);
@@ -44,11 +45,25 @@ export const Layout = ({ children }) => {
       : await readNotification('all', { userId: session.user.id });
 
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      sx={{ overflow: 'hidden', background: `url(${'./tripBG.jpg'})` }}
-    >
+    <Box width="100vw" height="100vh" sx={{ overflow: 'hidden' }}>
+      <Box
+        sx={{
+          position: 'fixed',
+          zIndex: '-10',
+          height: '100vh',
+          width: '100vw',
+          overflow: 'hidden',
+        }}
+      >
+        <Image
+          alt="background"
+          src="/tripBG.jpg"
+          quality={100}
+          objectFit="cover"
+          layout="fill"
+          sizes="100vw"
+        />
+      </Box>
       <Box height="60px" position="absolute" top="0">
         <AppBar sx={{ height: '60px', background: '#434870' }}>
           <Toolbar disableGutters>

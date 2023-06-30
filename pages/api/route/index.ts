@@ -51,6 +51,7 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
       }
+      console.log(fields);
 
       const route = await prisma.route.create({
         data: {
@@ -66,26 +67,30 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           groupTour: groupTour === 'true',
           maxParticipants: parseInt(maxParticipants) || -1,
           price: price ? price : '0',
-          meetingLocationX: parseFloat(fields.meetingLocation[0]) || null,
-          meetingLocationY: parseFloat(fields.meetingLocation[1]) || null,
+          meetingLocationX: fields.meetingLocation
+            ? parseFloat(fields.meetingLocation[0])
+            : undefined,
+          meetingLocationY: fields.meetingLocation
+            ? parseFloat(fields.meetingLocation[1])
+            : undefined,
           meetingTime,
           startDate,
           endDate,
           stripePrice: product ? product.default_price : '',
         },
       });
-
+      console.log(route);
       if (coverPhoto) {
         await saveFile(coverPhoto, files.coverPhoto.filepath, 'coverPhotos');
       }
       if (track) {
         await saveFile(track, files.routeFile.filepath, 'trackFiles');
       }
-      return res.status(200).json(route);
+      res.status(200).json(route);
     });
   } catch (e) {
     console.log(e);
-    return res.status(500).json({ error: 'Internal error' });
+    res.status(500).json({ error: 'Internal error' });
   }
 };
 
