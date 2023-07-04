@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import { useSession } from 'next-auth/react';
 import { User } from '@prisma/client';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import fetcher from '../../../lib/fetcher';
 import Link from 'next/link';
 import { grey } from '@mui/material/colors';
@@ -31,19 +31,23 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { UserWithRelation } from '../../../lib/types';
 
-//TODO: SWR ONLY FOR NOTI, REST COME FROM SERVER
 export const Layout = ({ children }) => {
   const { data: session } = useSession();
-  const { data: user } = useSWR<UserWithRelation>(
+  const { data: user, mutate } = useSWR<UserWithRelation>(
     session ? `/user/get/${session.user.id}` : null,
   );
   const { pathname, asPath, query, push, locale } = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const read = async (notificationId?: number) =>
     notificationId
-      ? await readNotification(notificationId)
-      : await readNotification('all', { userId: session.user.id });
-
+      ? await readNotification(notificationId).then(() => {
+          mutate();
+          setOpen(false);
+        })
+      : await readNotification('all', { userId: session.user.id }).then(() => {
+          mutate();
+          setOpen(false);
+        });
   return (
     <Box width="100vw" height="100vh" sx={{ overflow: 'hidden' }}>
       <Box
@@ -62,6 +66,7 @@ export const Layout = ({ children }) => {
           objectFit="cover"
           layout="fill"
           sizes="100vw"
+          priority
         />
       </Box>
       <Box height="60px" position="absolute" top="0">

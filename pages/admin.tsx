@@ -3,8 +3,8 @@ import { getSession } from 'next-auth/react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { MdDone, MdClear } from 'react-icons/md';
-import useSWR, { useSWRConfig } from 'swr';
+import { MdClear, MdDone } from 'react-icons/md';
+import useSWR from 'swr';
 import { routeApproval } from '../lib/mutations';
 
 type TempRoute = {
@@ -14,10 +14,10 @@ type TempRoute = {
 
 const Admin = ({ routes }: { routes: TempRoute[] }) => {
   const router = useRouter();
-  const { mutate } = useSWRConfig();
 
   const [routesData, setRoutesData] = useState<TempRoute[]>(routes);
-  const { data: upToDateRoutes } = useSWR<TempRoute[]>('/route/get/pending');
+  const { data: upToDateRoutes, mutate } =
+    useSWR<TempRoute[]>('/route/get/pending');
 
   useEffect(() => {
     if (upToDateRoutes) {
@@ -27,7 +27,7 @@ const Admin = ({ routes }: { routes: TempRoute[] }) => {
 
   const onClickApproval = async (approved: boolean, route: TempRoute) => {
     await routeApproval(route.id, { approved });
-    mutate('/route/get/pending');
+    mutate();
   };
 
   return (
@@ -108,7 +108,7 @@ export async function getServerSideProps(context) {
       };
     }
 
-    if(session.user.role !== 'admin') {
+    if (session.user.role !== 'admin') {
       return {
         redirect: {
           destination: '/',

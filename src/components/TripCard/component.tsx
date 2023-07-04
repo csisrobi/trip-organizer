@@ -25,9 +25,9 @@ import Image from 'next/image';
 import { mToKm } from '../../../utils/mToKm';
 import { mToH } from '../../../utils/mToH';
 import { mToRestM } from '../../../utils/mToRestM';
+import { useRouter } from 'next/router';
 
 export const TripCard = ({ route }: { route: Route }) => {
-  console.log(route);
   const { t } = useTranslation();
   const TypeIcon = () => {
     switch (route.type) {
@@ -69,7 +69,7 @@ export const TripCard = ({ route }: { route: Route }) => {
         return <></>;
     }
   };
-
+  const router = useRouter();
   return (
     <Link href={`/route/view/${route.id}`}>
       <Card sx={{ maxWidth: 345, height: 320, cursor: 'pointer' }}>
@@ -86,6 +86,10 @@ export const TripCard = ({ route }: { route: Route }) => {
           avatar={
             <Tooltip
               title={`${route.CreatorUser.lastName} ${route.CreatorUser.firstName}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/profile/${route.CreatorUser.id}`);
+              }}
             >
               <Avatar>
                 <Image

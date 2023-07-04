@@ -46,6 +46,7 @@ import { mToKm } from '../../../utils/mToKm';
 import { mToRestM } from '../../../utils/mToRestM';
 import { mToH } from '../../../utils/mToH';
 import { CommentsWithRelation, RouteWithRelation } from '../../../lib/types';
+import { useRouter } from 'next/router';
 
 type TabPanelProps = {
   children?: React.ReactNode;
@@ -65,7 +66,7 @@ const ViewRoute = ({ id }: { id: string }) => {
     loading: () => <CircularProgress />,
     ssr: false,
   });
-
+  const router = useRouter();
   const MapMarker = dynamic(() => import('../../../src/components/MapMarker'), {
     loading: () => <CircularProgress />,
     ssr: false,
@@ -129,17 +130,18 @@ const ViewRoute = ({ id }: { id: string }) => {
 
   const endTour = async () =>
     await closeRoute({ routeId: route.id })
-      .then(() =>
+      .then(() => {
         enqueueSnackbar('Closed successfully', {
           variant: 'success',
-        }),
-      )
+        });
+
+        router.push('/');
+      })
       .catch((e) =>
         enqueueSnackbar(e, {
           variant: 'error',
         }),
       );
-
   const joinTour = async () =>
     await joinRoute({ userId: session.user.id, routeId: route.id })
       .then(() =>
@@ -181,7 +183,7 @@ const ViewRoute = ({ id }: { id: string }) => {
         routeId: route.id,
         userId: session.user.id,
         content: activeComment,
-      });
+      }).then(() => mutate());
 
     if (!route) {
       return null;
@@ -231,36 +233,42 @@ const ViewRoute = ({ id }: { id: string }) => {
                     : ''}
                 </Typography>
               </Box>
-              {!route.price || route.price === '0' ? (
-                route.ParticipantUsers.find(
-                  (pu) => pu.userId === session.user.id,
-                ) ? (
-                  <Button>{t('leave')}</Button>
-                ) : (
-                  <Button onClick={joinTour}>{t('join')}</Button>
-                )
-              ) : route.ParticipantUsers.find(
-                  (pu) => pu.userId === session.user.id,
-                ) ? (
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  {t('thxForJoining')}
-                </Typography>
-              ) : (
-                <Box marginTop="2%" display="flex" alignItems="center">
-                  <Typography sx={{ fontWeight: 'bold', marginRight: '2%' }}>
-                    {t('tourPrice')}:
-                  </Typography>
-                  <Typography
-                    sx={{ marginRight: '2%' }}
-                  >{`${route.price}RON`}</Typography>
-                  <Button
-                    onClick={onPayment}
-                    variant="contained"
-                    startIcon={<MdCreditCard />}
-                  >
-                    {t('payNow')}
-                  </Button>
-                </Box>
+              {route.CreatorUser.id !== session.user.id && (
+                <>
+                  {!route.price || route.price === '0' ? (
+                    route.ParticipantUsers.find(
+                      (pu) => pu.userId === session.user.id,
+                    ) ? (
+                      <Button>{t('leave')}</Button>
+                    ) : (
+                      <Button onClick={joinTour}>{t('join')}</Button>
+                    )
+                  ) : route.ParticipantUsers.find(
+                      (pu) => pu.userId === session.user.id,
+                    ) ? (
+                    <Typography sx={{ fontWeight: 'bold' }}>
+                      {t('thxForJoining')}
+                    </Typography>
+                  ) : (
+                    <Box marginTop="2%" display="flex" alignItems="center">
+                      <Typography
+                        sx={{ fontWeight: 'bold', marginRight: '2%' }}
+                      >
+                        {t('tourPrice')}:
+                      </Typography>
+                      <Typography
+                        sx={{ marginRight: '2%' }}
+                      >{`${route.price}RON`}</Typography>
+                      <Button
+                        onClick={onPayment}
+                        variant="contained"
+                        startIcon={<MdCreditCard />}
+                      >
+                        {t('payNow')}
+                      </Button>
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
           </Stack>
@@ -277,7 +285,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                 sx={{ width: '100%' }}
                 multiline
                 rows={3}
-                placeholder="Leave your comment"
+                placeholder={t('createaAComment')}
                 value={activeComment}
                 onChange={(e) => setActiveComment(e.target.value)}
               />
@@ -509,7 +517,7 @@ const ViewRoute = ({ id }: { id: string }) => {
                       {session &&
                         session.user.id === route.CreatorUser.id &&
                         route.groupTour &&
-                        moment(route.endDate).isAfter() && (
+                        moment(route.endDate).isBefore() && (
                           <Button onClick={endTour} sx={{ fontWeight: 'bold' }}>
                             {t('closeTour')}
                           </Button>

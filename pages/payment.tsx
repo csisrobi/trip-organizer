@@ -1,5 +1,5 @@
 import { Paper, Box, Typography, Stack, Button } from '@mui/material';
-import { useSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,18 +8,9 @@ import { joinRoute } from '../lib/mutations';
 
 const PaymentStatus = () => {
   const router = useRouter();
-  const { data: session } = useSession();
   useEffect(() => {
-    if (router.query.success === 'true') {
-      (async () => {
-        await joinRoute({
-          userId: session.user.id,
-          routeId: parseInt(router.query.routeId as string),
-        });
-      })();
-    }
-  }, [router, session]);
-
+    setTimeout(() => router.replace('/'), 3000);
+  }, [router]);
   return (
     <Box
       sx={{
@@ -66,5 +57,17 @@ const PaymentStatus = () => {
     </Box>
   );
 };
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  const { success, routeId } = context.query;
+  if (success === 'true') {
+    await joinRoute({
+      userId: session.user.id,
+      routeId: parseInt(routeId as string),
+    });
+  }
+  return { props: {} };
+}
 
 export default PaymentStatus;

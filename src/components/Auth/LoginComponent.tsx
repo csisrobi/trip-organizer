@@ -71,15 +71,6 @@ export const LoginComponent = () => {
           </Typography>
         )}
       </Stack>
-      <Grid container direction="row" alignItems="center">
-        <Grid item container direction="row" alignItems="center" xs={7}>
-          <Checkbox sx={{ padding: '0', marginRight: '8px' }} size="small" />
-          <Typography fontSize="14px">Remember me?</Typography>
-        </Grid>
-        <Grid item container justifyContent="flex-end" xs={5}>
-          <Typography fontSize="14px">Reset password</Typography>
-        </Grid>
-      </Grid>
       <Button variant="contained" onClick={handleFormSubmit}>
         Login
       </Button>

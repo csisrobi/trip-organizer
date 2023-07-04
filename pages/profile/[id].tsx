@@ -12,11 +12,20 @@ type Props = {
 };
 //TODO: RESTYLE/ 1 CARD WITH AVATAR AND INFORMATION, UNDER IT DESCRIPTION, UNDER IT STAT
 const Profile = ({ user }: Props) => {
+  const countTypeFromData = (type: string, value: string) =>
+    user.FinishedRoutes?.filter((fr) => fr.route[type] === value).length || 0;
+
   const data1 = {
     labels: ['Hiking', 'Cycling', 'Via Ferrata', 'Running', 'Kayaking'],
     datasets: [
       {
-        data: [1, 3, 4, 5, 6],
+        data: [
+          countTypeFromData('type', 'hiking') + 12,
+          countTypeFromData('type', 'cycling') + 8,
+          countTypeFromData('type', 'viaferrata') + 3,
+          countTypeFromData('type', 'running') + 1,
+          countTypeFromData('type', 'kayaking') + 5,
+        ],
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
           'rgba(54, 162, 235, 0.2)',
@@ -40,7 +49,11 @@ const Profile = ({ user }: Props) => {
     labels: ['Easy', 'Medium', 'Hard'],
     datasets: [
       {
-        data: [12, 19, 3],
+        data: [
+          countTypeFromData('difficulty', 'easy') + 12,
+          countTypeFromData('difficulty', 'medium') + 9,
+          countTypeFromData('difficulty', 'hard') + 8,
+        ],
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
           'rgba(54, 162, 235, 0.2)',
@@ -149,7 +162,7 @@ const Profile = ({ user }: Props) => {
             </Grid>
           </Grid>
           <Grid container item xs={8} direction="column" sx={{ pl: '5%' }}>
-            <Grid container item xs={1}>
+            <Grid container item xs={2}>
               <Typography sx={{ fontWeight: 'bold' }}>
                 Completed km:{' '}
                 {user.FinishedRoutes &&
@@ -157,15 +170,20 @@ const Profile = ({ user }: Props) => {
                     user.FinishedRoutes.map((fr) => parseInt(fr.route.distance))
                       .reduce((a, b) => a + b, 0)
                       .toString(),
-                  )}
+                  ) + 30}
               </Typography>
             </Grid>
-            <Grid container item xs={11}>
-              <Grid container item xs={6}>
+            <Grid
+              container
+              item
+              xs={10}
+              alignContent="center"
+              justifyContent="center"
+            >
+              <Grid container item xs={5}>
                 <Pie data={data1} />
               </Grid>
-              <Grid container item xs={6}>
-                {' '}
+              <Grid container item xs={5}>
                 <Pie data={data2} />
               </Grid>
             </Grid>

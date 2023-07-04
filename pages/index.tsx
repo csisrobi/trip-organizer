@@ -55,11 +55,6 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
   const { data: upToDateRoutes } = useSWR<Route[]>(
     `/route/get/${session ? 'all' : 'tours'}`,
   );
-  useEffect(() => {
-    if (upToDateRoutes) {
-      setRoutesData(upToDateRoutes);
-    }
-  }, [routesData, upToDateRoutes]);
 
   const [filterExpanded, setFilterExpanded] = useState<boolean>(false);
   const [filter, setFilter] = useState<Filter>({
@@ -70,6 +65,22 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
     duration: [0, 12],
   });
 
+  useEffect(() => {
+    if (upToDateRoutes) {
+      setRoutesData(upToDateRoutes);
+      setFilter((previous) => ({
+        ...previous,
+        distance: [
+          0,
+          Math.max(...(upToDateRoutes || []).map((ur) => mToKm(ur.distance))),
+        ],
+        duration: [
+          0,
+          Math.max(...(upToDateRoutes || []).map((ur) => mToH(ur.length))),
+        ],
+      }));
+    }
+  }, [routesData, upToDateRoutes]);
   const filterRoute = (value: Route) =>
     (filter.search === '' ||
       value.name.toLowerCase().includes(filter.search.toLowerCase())) &&
@@ -128,6 +139,8 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
     }
   };
 
+  const filteredRoutes = routesData.filter((route) => filterRoute(route));
+  console.log(filteredRoutes);
   return (
     <Box
       sx={{
@@ -238,7 +251,11 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
                 <Slider
                   valueLabelDisplay="auto"
                   step={1}
-                  max={100}
+                  max={
+                    Math.max(
+                      ...(upToDateRoutes || []).map((ur) => mToKm(ur.distance)),
+                    ) || 100
+                  }
                   value={filter.distance}
                   onChange={(
                     _event: Event,
@@ -252,10 +269,14 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
                 <Slider
                   valueLabelDisplay="auto"
                   step={0.5}
-                  max={12}
+                  max={
+                    Math.max(
+                      ...(upToDateRoutes || []).map((ur) => mToH(ur.length)),
+                    ) || 12
+                  }
                   value={filter.duration}
                   onChange={(
-                    event: Event,
+                    _event: Event,
                     newValue: number | number[],
                     activeThumb: number,
                   ) => handleChangeSlider(newValue, activeThumb, 'duration')}
@@ -294,16 +315,20 @@ const Home: NextPage = ({ routes }: { routes: Route[] }) => {
       </Box>
 
       <Grid container sx={{ width: '92%', mx: '4%', mt: '2%' }}>
-        {routesData
-          .slice(0, pagination * 6)
-          // .filter((route) => filterRoute(route))
-          .map((route) => (
-            <Grid key={route.id} item xs={7} lg={5} xl={3} sx={{ mb: '2%' }}>
-              <TripCard route={route} />
-            </Grid>
-          ))}
+        {filteredRoutes.slice(0, pagination * 8).map((route) => (
+          <Grid key={route.id} item xs={7} lg={5} xl={3} sx={{ mb: '2%' }}>
+            <TripCard route={route} />
+          </Grid>
+        ))}
       </Grid>
-      <Button onClick={() => setPagination(pagination + 1)}>Paginate</Button>
+      {filteredRoutes.length > pagination * 8 && (
+        <Button
+          sx={{ width: '300px', alignSelf: 'center' }}
+          onClick={() => setPagination(pagination + 1)}
+        >
+          Load more
+        </Button>
+      )}
     </Box>
   );
 };

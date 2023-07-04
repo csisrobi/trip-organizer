@@ -51,7 +51,6 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
       }
-      console.log(fields);
 
       const route = await prisma.route.create({
         data: {
@@ -79,7 +78,6 @@ const route = async (req: NextApiRequest, res: NextApiResponse) => {
           stripePrice: product ? product.default_price : '',
         },
       });
-      console.log(route);
       if (coverPhoto) {
         await saveFile(coverPhoto, files.coverPhoto.filepath, 'coverPhotos');
       }
